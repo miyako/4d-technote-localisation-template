@@ -44,7 +44,7 @@ The agent stops and asks you at each of these points:
 | 4 | Figures | Contact sheets `build/contact-N.png`; which screenshots need a real localised screenshot |
 | 5 | Demo data (optional) | Whether to replace the sample data (e.g. places) with local equivalents, and which ones |
 | 6 | 4D project | Localisation plan: XLIFF scope, new attributes, UI behaviour |
-| 7 | Release | Final PDF and demo; version tag |
+| 7 | Release | Final PDF and demo; the repository README (from `.github/templates/README.technote.md`); version tag |
 
 Edits are always safe. Generated output goes to `build/` only, and `make extract` never overwrites existing files.
 
@@ -110,6 +110,10 @@ git tag v1.0.0 && git push origin v1.0.0
 gh release create v1.0.0 build/*_ja.pdf build/*.zip --title "…" --notes "…"
 ```
 
+Before the first release, the agent replaces this README with the converted document's own README, built from
+`.github/templates/README.technote.md` (title, introduction, downloads, demo notes, differences, how to edit).
+This usage guide then stays available in the template repository.
+
 If you push a tag without creating the release yourself, `.github/workflows/release.yml` builds the assets
 on Linux and publishes them. It skips the upload if the release already has assets.
 
@@ -125,6 +129,6 @@ glossary.md          terminology
 technote.json        document-specific settings
 style/style.css      print stylesheet
 tools/               pipeline (Python)
-.github/             agent instructions, skills, workflows
+.github/             agent instructions, skills, workflows, templates/README.technote.md
 build/               output (git-ignored)
 ```

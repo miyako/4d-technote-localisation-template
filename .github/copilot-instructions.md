@@ -12,6 +12,9 @@ Detailed references:
 - `.github/instructions/technote-translation.instructions.md`: the pipeline, config keys, figure rules, pitfalls
 - `.github/instructions/4d-*.instructions.md` and the other `*.instructions.md` files: 4D coding conventions for `demo/**`
 - Skills in `.github/skills/`: `review-figures`, `apply-glossary`, `localise-demo-data`, `localise-4d-project`, `release-technote`
+- `.github/templates/README.technote.md`: the README of the converted repository (see Phase 6)
+
+`README.md` is the template's usage guide until the release. Don't edit it for the specific document before then.
 
 ## Non-negotiable rules
 
@@ -91,8 +94,11 @@ Track the phases with todos. **STOP** means: summarise what you did, list what t
   (`tools/tool4d.py`); otherwise say so explicitly. Ask the user to check the forms visually in 4D.
 
 ### Phase 6: Release
-- Skill `release-technote`. **STOP (checkpoint 7):** confirm the version tag, the title, the notes and the
-  assets before publishing.
+- Replace `README.md` with `.github/templates/README.technote.md`. Fill in every placeholder from real data
+  (`technote.json`, the PDF title, `demo/`, the release URL), and remove the sections that don't apply.
+  Ask the user for the introduction text and the credits, or draft them and get them approved.
+- Skill `release-technote`. **STOP (checkpoint 7):** confirm the README, the version tag, the title, the notes
+  and the assets before publishing.
 
 ## Environment notes
 - Local runs are usually macOS: Hiragino fonts, `/Applications/Google Chrome.app`, tool4d under `/Applications/tool4d/`.
