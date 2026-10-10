@@ -33,6 +33,7 @@ h1, h2, h3, h4 {
   line-height: 1.4;
   break-after: avoid;
 }
+h1, h2, h3, h4, .toc .t { word-break: auto-phrase; }  /* CJK: break at phrase boundaries (Chrome 119+) */
 h2 { font-size: 13pt; margin: 1.6em 0 0.6em; }
 h3 { font-size: 12pt; margin: 1.3em 0 0.5em; }
 h4 { font-size: 11pt; margin: 1.1em 0 0.4em; }
@@ -102,3 +103,16 @@ table { border-collapse: collapse; margin: 0.4em auto 1em; font-size: 10pt; }
 th, td { border-bottom: 1px solid #ccc; padding: 0.25em 1.2em; }
 th { text-align: left; border-bottom: 1.5px solid #888; }
 td:last-child, th:last-child { text-align: right; }
+
+/* Notes and quotes (quote.italic) and translator's notes */
+blockquote {
+  margin: 0.5em 0 0.9em;
+  padding: 0.4em 0.9em;
+  border-left: 3px solid var(--accent, #2f5496);
+  background: #f5f7fb;
+  font-size: 10pt;
+}
+blockquote p { margin: 0; text-align: left; }
+
+/* Bare URLs may break anywhere (see build.py) */
+.url { word-break: break-all; }

@@ -14,8 +14,15 @@ Rules for a line in fig-NN.<tgt>.txt:
   * anything else                -> source erased, translation drawn in place
 Figures with "replace": "<file>" use that file from figures/ instead (e.g. a localised screenshot).
 Figures with "localize": false (or without a .<tgt>.txt) are copied unchanged.
+
+Rotated labels: an item with "angle" (degrees, counter-clockwise), "center" [x, y],
+"length" and "thickness" (the inked text extent along and across the baseline, px) is
+erased as a rotated rectangle and redrawn rotated; its "box" only samples the colours.
+"rotate": 90 (reads bottom to top) or 270 (top to bottom) is a shorthand for a vertical
+label that fills its "box" (no angle/center/length/thickness needed).
 """
 import json
+import math
 import shutil
 import sys
 from pathlib import Path
@@ -47,8 +54,10 @@ def mode_color(pixels):
         key = tuple(c // 8 * 8 for c in p[:3])
         counts[key] = counts.get(key, 0) + 1
     key = max(counts, key=counts.get)
-    sel = [p for p in pixels if tuple(c // 8 * 8 for c in p[:3]) == key]
-    return tuple(sum(p[i] for p in sel) // len(sel) for i in range(4))
+    sel = [tuple(p) for p in pixels if tuple(c // 8 * 8 for c in p[:3]) == key]
+    # the commonest exact colour of the winning bucket, not its mean: averaging pure white
+    # with anti-aliasing noise gives an off-white that shows as a visible patch
+    return max(set(sel), key=sel.count)
 
 
 def background(img, box, pad=4):
@@ -133,6 +142,35 @@ def snap_sizes(sizes, tol=0.08, absorb=0.30):
     return out
 
 
+def rotation(item):
+    """{angle, center, length, thickness, fit} of a rotated label, or None."""
+    if "angle" in item:
+        return {"angle": item["angle"], "center": item["center"], "length": item["length"],
+                "thickness": item["thickness"], "fit": item["length"] * 1.3}
+    if item.get("rotate") in (90, 270):
+        x, y, w, h = item["box"]
+        return {"angle": item["rotate"], "center": (x + w / 2, y + h / 2), "length": h, "thickness": w,
+                "fit": h - 4}
+    return None
+
+
+def rotated_rect(cx, cy, length, thick, angle):
+    a = math.radians(-angle)  # image y points down
+    ux, uy = math.cos(a), math.sin(a)
+    vx, vy = -uy, ux
+    return [(cx + sx * length / 2 * ux + sy * thick / 2 * vx, cy + sx * length / 2 * uy + sy * thick / 2 * vy)
+            for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+
+
+def draw_rotated(img, text, f, fill, center, angle):
+    l, t, r, b = f.getbbox(text)
+    layer = Image.new("RGBA", (r - l + 4, b - t + 4), (0, 0, 0, 0))
+    ImageDraw.Draw(layer).text((2 - l, 2 - t), text, font=f, fill=fill)
+    layer = layer.rotate(angle, resample=Image.BICUBIC, expand=True)
+    img.alpha_composite(layer, (int(round(center[0] - layer.width / 2)),
+                                int(round(center[1] - layer.height / 2))))
+
+
 def render(name, layout, en, ja):
     src_img = Image.open(FIG / layout["source"]).convert("RGBA")
     img = Image.new("RGBA", src_img.size, (255, 255, 255, 255))
@@ -147,7 +185,14 @@ def render(name, layout, en, ja):
         fg, ink = foreground(img, box, bg)
         if "fg" in item:
             fg = tuple(item["fg"])
-        size_en = estimate_size(draw, src, box)
+        rot = rotation(item)
+        if rot and "angle" in item:  # fit the source text to its measured length instead of the box
+            tw, _ = text_size(draw, src, font("regular", 100))
+            size_en = 100 * rot["length"] / max(1, tw)
+        elif rot:
+            size_en = estimate_size(draw, src, [box[0], box[1], rot["length"], rot["thickness"]])
+        else:
+            size_en = estimate_size(draw, src, box)
         weight = item.get("weight", "regular")
         left, right = free_span(img, box, bg)
         jobs.append((item, src, dst, box, bg, fg, weight, left, right, size_en))
@@ -156,6 +201,11 @@ def render(name, layout, en, ja):
     for item, src, dst, box, bg, fg, weight, left, right, size_en in jobs:
         x, y, w, h = box
         p = item.get("erase_pad", 3)
+        rot = rotation(item)
+        if rot:
+            draw.polygon(rotated_rect(*rot["center"], rot["length"] + 2 * p, rot["thickness"] + 2 * p,
+                                      rot["angle"]), fill=bg)
+            continue
         draw.rectangle([x - p, y - p, x + w + p, y + h + p], fill=bg)
     W = img.size[0]
     for item, src, dst, box, bg, fg, weight, left, right, size_en in jobs:
@@ -163,6 +213,15 @@ def render(name, layout, en, ja):
             continue
         x, y, w, h = box
         size = (item.get("size") or size_en) * item.get("scale", 1.0)
+        rot = rotation(item)
+        if rot:
+            f = font(weight, size)
+            tw, _ = text_size(draw, dst, f)
+            if tw > rot["fit"]:
+                f = font(weight, size * rot["fit"] / tw)
+            cx, cy = rot["center"]
+            draw_rotated(img, dst, f, fg, (cx + item.get("dx", 0), cy + item.get("dy", 0)), rot["angle"])
+            continue
         margin = max(6, h // 3)
         if item.get("align") == "left":
             avail = right - x - margin

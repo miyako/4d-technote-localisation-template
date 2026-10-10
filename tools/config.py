@@ -21,12 +21,25 @@ DEFAULTS = {
     "header_y": 0,                  # ignore lines whose top is above this (pt)
     "footer_y": 710,                # ignore lines whose top is below this (pt)
     "heading": {"fonts": ["Bold", "Medium"], "min_size": 12, "levels_by_x": {}, "default_level": 2},
-    "code": {"colors": [], "fonts": ["Mono", "Courier", "Menlo", "Consolas", "Monaco"], "indent": 5},
-    "bullets": {"fonts": ["SymbolMT", "Wingdings-Regular"], "strip_fonts": ["ArialMT"]},
-    "caption": {"italic": True, "min_x": 0},
-    "table": {"size": None},        # font size used only by table cells, or null
+    # indent: x offset (pt) that continues a started code block; null = only colour/font mark code
+    "code": {"colors": [], "fonts": ["Mono", "Courier", "Menlo", "Consolas", "Monaco"], "indent": 5,
+             "blank_lines_inside": False,  # true: blank lines never end a code block
+             "indent_starts": False},      # true: an unstyled line at x >= body x + indent starts a code block
+    # glyphs: a line whose text is one of these is a list marker (bullet set in the body font)
+    "bullets": {"fonts": ["SymbolMT", "Wingdings-Regular"], "strip_fonts": ["ArialMT"], "glyphs": ["•", "◦", "▪"]},
+    # pattern: regex (searched in the stripped line) that marks captions; max_size: captions are at most this size
+    "caption": {"italic": True, "min_x": 0, "pattern": None, "max_size": None},
+    "quote": {"italic": False},     # true: all-italic lines that are not captions become > blockquotes ("callout" = alias)
+    "figure": {"min_width_pt": 0},  # narrower images (inline icons) are ignored
+    "vector_figures": [],           # [{"page": N, "clip": [x0, y0, x1, y1], "dpi": 300}]: rasterise vector diagrams
+    "table": {"size": None,         # font size used only by table cells, or null
+              "ruled": False},      # true: detect ruled (vector-drawn) tables with pymupdf find_tables
     "paragraph": {"gap": 3, "short_line_x1": 470},
-    "ocr": {"psm": 11, "min_conf": 30, "noise": r"^[E ]+$"},
+    # engine: tesseract | vision (macOS Apple Vision, tools/ocr_vision.swift) | auto (vision if available)
+    # scale: upscale factor before Tesseract; second_pass_scale: extra Tesseract pass on an upscaled,
+    # contrast-stretched greyscale copy, merged with the first (finds light text on tinted shapes), or null
+    "ocr": {"engine": "tesseract", "psm": 11, "min_conf": 30, "noise": r"^[E ]+$", "scale": 1,
+            "second_pass_scale": None},
     "figure_fonts": {},             # {"light"|"regular"|"bold": [path or path#index, ...]}
     "demo_dir": "demo",
 }
@@ -64,6 +77,8 @@ def load():
     path = ROOT / "technote.json"
     user = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     user = {k: v for k, v in user.items() if not k.startswith("$")}
+    if "callout" in user:  # older name of "quote"
+        user.setdefault("quote", user.pop("callout"))
     cfg = _merge(DEFAULTS, user)
     if not cfg["source_pdf"]:
         pdfs = sorted((ROOT / "document").glob("*.pdf"))
