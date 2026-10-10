@@ -1,5 +1,7 @@
 # Prepares the environment for the GitHub Copilot cloud agent.
 # https://docs.github.com/copilot/customizing-copilot/customizing-the-development-environment-for-copilot-coding-agent
+# The job name `copilot-setup-steps` is required. Keep `submodules: true` on the checkout step so the
+# agent sees the skills in `.agents/` (miyako/skills, branch dist). Repository-specific steps come after it.
 name: Copilot setup steps
 
 on:
@@ -16,6 +18,11 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Check skills
+        run: test -f .agents/AGENTS.md && ls .agents/skills
 
       - uses: actions/setup-python@v5
         with:

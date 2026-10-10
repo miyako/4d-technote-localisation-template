@@ -20,13 +20,17 @@ flowchart LR
 
 ## Quick start
 
-1. **Use this template** (on GitHub, *Use this template → Create a new repository*), then clone it.
+1. **Use this template** (on GitHub, *Use this template → Create a new repository*), then clone it with its
+   submodule, which holds the agent skills (see [Agent instructions and skills](#agent-instructions-and-skills)):
+   ```sh
+   git clone --recurse-submodules https://github.com/<owner>/<repo>.git
+   ```
 2. Add the source material and push:
    - the English PDF → `document/<name>.pdf` (exactly one PDF)
    - the 4D project → `demo/<ProjectName>/` (the folder that contains `Project/`)
 3. Start the agent. Use either:
    - **Locally** (Copilot CLI or the Copilot app, recommended): open the repository and prompt:
-     > Localise this technical note and its demo into Japanese. Follow .github/copilot-instructions.md and stop at every checkpoint for my review.
+     > Localise this technical note and its demo into Japanese. Follow AGENTS.md and stop at every checkpoint for my review.
    - **Cloud agent:** open an issue with the **Localisation request** form and assign it to Copilot.
      The agent works in a pull request. Reply in the PR to give directions at each checkpoint.
 4. Review at each **checkpoint** (see below). Edit files directly or tell the agent what to change.
@@ -95,7 +99,8 @@ Per figure: `"localize": false` keeps the image unchanged; `"replace": "fig-NN-j
 | Google Chrome / Chromium | `/Applications/Google Chrome.app` | preinstalled on GitHub runners, or set `$CHROME` |
 | Tesseract OCR | `brew install tesseract` | `apt install tesseract-ocr` |
 | Japanese fonts for figures | Hiragino (built in) | `apt install fonts-noto-cjk` |
-| tool4d (4D headless checks) | optional, `/Applications/tool4d/…` or `$TOOL4D` | not available, so 4D checks are skipped |
+| tool4d (runs 4D test methods) | optional, `/Applications/tool4d/…` or `$TOOL4D` | not available, so 4D tests are skipped |
+| 4D syntax checks | `4dlsp` skill: `tool4d-lsp-stdio` (provisioned into `tools/4dlsp/`) + tool4d | not set up, so syntax checks are skipped |
 
 `.github/workflows/copilot-setup-steps.yml` prepares the Linux environment for the cloud agent.
 
@@ -117,6 +122,22 @@ This usage guide then stays available in the template repository.
 If you push a tag without creating the release yourself, `.github/workflows/release.yml` builds the assets
 on Linux and publishes them. It skips the upload if the release already has assets.
 
+## Agent instructions and skills
+
+| Path | What |
+|---|---|
+| `AGENTS.md` | The agent's instructions: rules, workflow and checkpoints (Copilot, Codex; Claude Code via `CLAUDE.md`) |
+| `.github/instructions/technote-translation.instructions.md` | Pipeline reference: `technote.json` keys, extraction, figures, reassembly, pitfalls |
+| `.agents/` | Git submodule → [miyako/skills](https://github.com/miyako/skills), branch `dist`: the `technote-*` skills (figures, glossary, demo data, 4D demo, release) and the generic 4D skills (`4dlocalise`, `4dstartup`, `4dlsp`, …) |
+
+- In an existing clone, or if `.agents/` is empty: `git submodule update --init .agents`.
+- `.github/workflows/update-skills.yml` moves `.agents` to the latest skills every Monday (or on demand from the
+  Actions tab) and commits the new pointer. To update by hand:
+  `git submodule update --remote .agents && git commit -m "Update skills" .agents`.
+- Don't edit files under `.agents/`; improve the skill in miyako/skills instead.
+- Tools that the skills download (e.g. `tool4d-lsp-stdio` for syntax checks) go to `tools/4dlsp/` and similar
+  folders, which are git-ignored. The pipeline scripts `tools/*.py` are committed.
+
 ## Layout
 
 ```
@@ -128,7 +149,10 @@ data/                localised demo data (optional)
 glossary.md          terminology
 technote.json        document-specific settings
 style/style.css      print stylesheet
-tools/               pipeline (Python)
-.github/             agent instructions, skills, workflows, templates/README.technote.md
+tools/               pipeline (Python, committed); tools/4d*/ are provisioned by the skills (git-ignored)
+AGENTS.md            agent instructions (CLAUDE.md points to it)
+.agents/             skills (submodule miyako/skills, branch dist)
+.github/             instructions/technote-translation.instructions.md, workflows, ISSUE_TEMPLATE,
+                     templates/README.technote.md
 build/               output (git-ignored)
 ```
