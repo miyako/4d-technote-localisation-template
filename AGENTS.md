@@ -23,7 +23,8 @@ References:
 - Generic 4D skills for `demo/**`: `4dlocalise` (XLIFF, names that follow the UI language), `4dstartup`
   (non-blocking startup window), `4dmodernise` (`C_*` → `var`), `4dmethods` (method visibility), `4dform`
   (forms, list boxes), `4dcss` (stylesheets, dark mode, Liquid Glass), `4dproject` (`menus.json`, version,
-  token suffixes, `.gitignore`), `4dlsp` (syntax checks), `4dcli` (running tool4d)
+  token suffixes, `.gitignore`), `4dorda` (ORDA code, computed attributes), `4dlsp` (syntax checks), `4dcli`
+  (running tool4d)
 - `.github/templates/README.technote.md`: the README of the localised repository (see Phase 6)
 
 Until the first release, `README.md` is the template's usage guide. Don't edit it for the specific document before
