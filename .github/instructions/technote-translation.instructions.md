@@ -208,12 +208,117 @@ submodule is updated. Reusable procedures belong in that skill, not in this refe
 - Match each region's actual fonts and rendering context: 4D form, browser content (CSS/webfonts), browser chrome
   or OS dialog; platform/version, locale, theme and display scale affect the result. The diagram renderer's global
   `figure_fonts` is not a per-region screenshot font selector; do not invent unsupported item font overrides.
-- When in doubt, follow `4dcli` to launch full GUI 4D and capture the relevant runtime UI. Headless tool4d or a
-  Form Editor image cannot establish native-dialog fidelity. Do not modify the demo for capture without the
-  project-editing checkpoint. If still uncertain or the matching environment is unavailable, request manual
-  confirmation or a localised screenshot, and leave the result explicitly unverified.
+- When in doubt, prefer a short shot list and manual window captures (see below). Use
+  [4dcli](../../.agents/skills/4dcli/SKILL.md) only for an approved full-GUI capture workflow. Headless tool4d or a
+  form-only image cannot establish native-dialog or editor-chrome fidelity. Do not modify the demo for capture
+  without the project-editing checkpoint. If still uncertain or the matching environment is unavailable, request
+  manual confirmation or a localised screenshot, and leave the result explicitly unverified.
 - Review replacements on contact sheets and at native resolution, then spot-check the rebuilt PDF. Keep
   checkpoint 4: mechanical translation does not remove editorial approval.
+
+### Mac captures and opening 4D editors
+
+This is the operator handoff for this pipeline, not a capture-automation framework. For reusable localisation
+and rendering procedures, follow [technote-localise-screenshots](../../.agents/skills/technote-localise-screenshots/SKILL.md)
+and [4dcli](../../.agents/skills/4dcli/SKILL.md). **If the editor chooses manual capture, stop automation
+immediately** and supply only the short shot list.
+
+#### Prepare the shot list
+
+For each `fig-NN`, identify the required surface; one kind of image cannot stand in for another:
+
+| Surface | Capture |
+|---|---|
+| Running demo | The actual runtime window in the approved data/state |
+| 4D Form Editor | The native editor, with required object selected and Property List/tab visible |
+| Method editor | The native editor showing the unchanged method and required line |
+| Built-in 4D or native OS dialog | The actual dialog in the matching product/OS and locale |
+
+Record the figure number, project/form/method, selected object/tab/line, locale, 4D build, macOS version,
+theme, zoom and display scale; note unknowns. Do not translate code or identifiers. Missing demo sources,
+unresolved UI resources or uncertain fonts mean **blocked/manual confirmation**, not a fabricated replacement.
+
+#### Open the actual editors
+
+Use installed **full GUI 4D**, with Design access, and existing project objects; not tool4d or headless mode.
+Open through 4D's UI, or execute the following commands in the approved project context. These examples use
+placeholder names: substitute existing forms, objects and methods. No new startup method or working-demo
+edit is needed. If a CLI workflow is separately approved, follow `4dcli` and use an approved temporary copy.
+
+[`FORM EDIT`](https://developer.4d.com/docs/commands/form-edit) has signatures
+`FORM EDIT({aTable; }form)` and `FORM EDIT({aTable; }form; object)` (braces denote optional arguments).
+`aTable` is a Table reference; `form` and `object` are Text:
+
+```4d
+FORM EDIT("ExistingProjectForm")
+FORM EDIT([ExistingTable]; "ExistingTableForm")
+FORM EDIT("ExistingProjectForm"; "ExistingObject")
+```
+
+The command was introduced in **18 R5**; object/group selection requires **20 R8** or later.
+It returns before the editor is ready. Design access is required (otherwise error `-9804`); a missing form
+raises error `81`, but a missing object silently leaves nothing selected. Visually confirm the selection,
+then open **Form > Property List** and choose the required tab/zoom manually.
+
+[`METHOD OPEN PATH`](https://developer.4d.com/docs/commands/method-open-path) has signature
+`METHOD OPEN PATH(path{; line}{; *})`, where `path` is Text and `line` is Real (a line number):
+
+```4d
+METHOD OPEN PATH("ExistingProjectMethod"; 10)
+```
+
+This opens an existing project method at line 10; it does not execute or translate the displayed method.
+The path is a **4D internal method path**, not a filesystem `.4dm` path. The command supports all method
+types and class functions; use [`METHOD Get path`](https://developer.4d.com/docs/commands/method-get-path)
+for database methods, triggers, form/object methods and classes rather than guessing path syntax.
+`METHOD OPEN PATH` was introduced in **v13** and is asynchronous: wait for the actual editor and confirm the
+visible line before capturing. A nonexistent method raises `-9801`. From a component, `*` is required to
+open the host's method; omitting it raises `-9763` (outside a component, `*` is ignored).
+
+These signatures and limitations are checked against the linked official documentation. `FORM EDIT` with
+object selection and manual Property List opening has also been exercised in full GUI Japanese 4D 21 R4
+on macOS; the `METHOD OPEN PATH` example is documentation-verified, **not GUI-tested**.
+
+#### Take the window capture
+
+Follow [Apple's window screenshot instructions](https://support.apple.com/en-us/102646):
+press **Command-Shift-4**, release, then press **Space** and click the task window.
+Hold **Option while clicking** to omit its shadow; **Escape** cancels. For a separate floating Property List,
+capture that window too, or use a tightly scoped region capture if the approved figure needs both.
+Avoid full-desktop captures; exclude private/unrelated windows, notifications and data before capture,
+and crop immediately to the required region before retaining or sharing. Save a PNG replacement separately
+as `figures/fig-NN-<tgt>.png`; never overwrite `figures/fig-NN.png`.
+
+Manual screenshot shortcuts and merely opening editors with the 4D commands do **not** require Accessibility
+permission. Only if programmatic native capture is approved, check **System Settings > Privacy & Security >
+[Screen & System Audio Recording](https://support.apple.com/guide/mac-help/control-access-screen-system-audio-recording-mchld6aa7d23/mac)**.
+In the GitHub Copilot Mac app, a child CLI capture can inherit the host app's permission context: check
+GitHub Copilot if macOS attributes the request there. A capture launched from Terminal may instead require
+Terminal's permission. Follow the actual macOS attribution/prompt, not a universal host-name assumption.
+Ask the user to grant access; never bypass it, and restart the host only if macOS requests it.
+
+[Accessibility](https://support.apple.com/guide/mac-help/allow-accessibility-apps-to-access-your-mac-mh43185/mac)
+is separate and needed only for approved accessibility-based UI automation; screen-recording permission
+does not authorize UI interaction. Limit any automation to the owned, isolated capture process, never unrelated apps.
+If an approved workflow uses `screencapture -x -o -l "$window_id" output.png`, first observe and verify that
+the ID belongs to the task window; never hardcode an ID or fall back to whole-screen capture.
+Do not filter discovery to layer 0 alone: floating panels such as Property List may be at layer 3.
+
+#### Review and hand back to the pipeline
+
+`FORM SCREENSHOT` produces a form image, not the native editor's chrome, Property List or OS dialogs.
+Logical form dimensions can differ from a Retina window's pixel dimensions, and form images may contain
+transparent backgrounds. Do not flatten onto guessed colours or blindly upscale to imitate a native capture.
+Current native layouts, themes and aspect ratios can differ from an older source: obtain editorial approval
+for those differences, rather than stretching, repainting or redesigning the UI to fake a match.
+A saved image or successful exit does not prove intended font resolution. Disclose font-fallback warnings
+and ask for visual approval; a native capture alone is not proof of font or pixel fidelity.
+
+Review the supplied replacement at native resolution before enabling it. Preserve the layout's other fields,
+keep `"localize": false`, and set `"replace": "fig-NN-<tgt>.png"` only after review. Then run `make`,
+`make review FIGS="NN"`, inspect the contact sheet and spot-check the affected PDF pages at checkpoint 4.
+Commit approved outputs and the minimal capture-state/approval record; leave unresolved figures unchanged
+and explicitly blocked or unverified. Manual takeover never implies automatic approval.
 
 ## Reassembly (`tools/build.py`)
 

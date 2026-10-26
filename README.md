@@ -104,10 +104,13 @@ and the demo's translated resources for demo labels. Fonts must match the actual
 browser content, browser chrome and native system dialogs can use different fonts on macOS and Windows.
 The target language, OS version, theme and display scale matter; a generic CJK font is not proof of fidelity.
 
-When rendering is uncertain, the agent uses `4dcli` to launch full GUI 4D and capture the relevant UI where
-possible. **tool4d is English-only** and cannot verify localised native UI. Missing resources, fonts or a
-matching platform are reported, not silently substituted. Remaining uncertainty requires your manual
-confirmation or a localised capture before the screenshot is accepted at checkpoint 4.
+When a native capture is needed, prefer a short shot list and let the editor capture the relevant window
+manually. See [Mac captures and opening 4D editors](.github/instructions/technote-translation.instructions.md#mac-captures-and-opening-4d-editors)
+for window shortcuts, permissions, `FORM EDIT` and `METHOD OPEN PATH`. Stop automation immediately when
+the editor takes over; use `4dcli` only for an approved full-GUI capture workflow.
+**tool4d is English-only** and cannot verify localised native UI. Missing resources, fonts, demo sources or a
+matching platform are blockers, not permission to invent UI. Remaining uncertainty requires manual
+confirmation or a localised capture before acceptance at checkpoint 4.
 
 ## Commands
 
