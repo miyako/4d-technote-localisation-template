@@ -19,7 +19,7 @@ References:
 - `.github/instructions/technote-translation.instructions.md`: the pipeline, `technote.json` keys, figure rules,
   verification checklist and pitfalls
 - Technote skills (see [Skills](#skills-keep-as-is)): `technote-review-figures`, `technote-apply-glossary`,
-  `technote-localise-demo-data`, `technote-localise-4d-project`, `technote-release`
+  `technote-localise-screenshots`, `technote-localise-demo-data`, `technote-localise-4d-project`, `technote-release`
 - Generic 4D skills for `demo/**`: `4dlocalise` (XLIFF, names that follow the UI language), `4dstartup`
   (non-blocking startup window), `4dmodernise` (`C_*` → `var`), `4dmethods` (method visibility), `4dform`
   (forms, list boxes), `4dcss` (stylesheets, dark mode, Liquid Glass), `4dproject` (`menus.json`, version,
@@ -88,12 +88,19 @@ Track the phases with todos. **STOP** means: summarise what you did, list what t
 - Create `src/<tgt>.md`: translate paragraph by paragraph, keeping the structure, code fences and `![caption](fig-NN)`.
 - Create `figures/fig-NN.<tgt>.txt` for each localisable figure, line-aligned with the English file.
 - Record every terminology choice and proper noun in `glossary.md`.
+- For screenshots, use `technote-localise-screenshots`: mechanically replace text with authoritative UI
+  translations and context-correct fonts, preserving the original image and saving a separate replacement.
+  Keep `"localize": false` to bypass the diagram overlay; set `"replace"` to the reviewed replacement.
+  If the skill is absent from the pinned `.agents`, stop and report the missing skill rather than improvising.
 - `make`, then `make review`. Check the contact sheets and fix layout issues with the overrides in `figures/layout/`
   (skill `technote-review-figures`).
 - Commit. **STOP (checkpoint 3):** ask the user to review `src/<tgt>.md` and `glossary.md`, and list any terms you
   were unsure about.
-- **STOP (checkpoint 4):** ask the user to review the contact sheets and the PDF. Ask for localised screenshots of
-  the app for figures marked `"localize": false`, and use `"replace"` when they arrive.
+- **STOP (checkpoint 4):** ask the user to review the contact sheets and the PDF, including mechanically translated
+  screenshots. If wording, fonts or rendering remain uncertain, use `4dcli` to capture the full GUI 4D application
+  where applicable, then ask for manual confirmation or a localised capture if still unsure. tool4d is English-only
+  and is not evidence for localised native UI rendering. Leave unresolved screenshots unchanged and report them;
+  never present them as verified.
 
 ### Phase 3: Edit loop (repeat as needed)
 - Apply the user's directions, or rebuild after the user's own edits: run `make`, inspect what changed, and commit.

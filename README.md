@@ -45,7 +45,7 @@ The agent stops and asks you at each of these points:
 | 1 | `make inspect` | Detected heading, code and caption styles in `technote.json`; target language; output style |
 | 2 | `make extract` | `src/en.md` reads correctly (headings, code blocks, figures in the right places); OCR'd figure text |
 | 3 | First translation | `src/ja.md`, `glossary.md`: terminology and tone |
-| 4 | Figures | Contact sheets `build/contact-N.png`; which screenshots need a real localised screenshot |
+| 4 | Figures | Contact sheets `build/contact-N.png` and PDF; translated screenshots, unresolved wording/fonts and any captures needing manual confirmation |
 | 5 | Demo data (optional) | Whether to replace the sample data (e.g. places) with local equivalents, and which ones |
 | 6 | 4D project | Localisation plan: XLIFF scope, new attributes, UI behaviour |
 | 7 | Release | Final PDF and demo; the repository README (from `.github/templates/README.technote.md`); version tag |
@@ -59,7 +59,7 @@ Edits are always safe. Generated output goes to `build/` only, and `make extract
 | `src/ja.md` | Translated body text (Markdown). Keep the block structure parallel to `src/en.md`. **Don't touch code blocks.** |
 | `figures/fig-NN.ja.txt` | Text drawn in figure NN, one line per line of `fig-NN.en.txt` (see below) |
 | `figures/layout/fig-NN.json` | Optional per-label tweaks (size, weight, alignment, position) |
-| `figures/fig-NN-ja.png` | Optional ready-made replacement image (e.g. a screenshot of the localised app) |
+| `figures/fig-NN-ja.png` | Reviewed replacement image (mechanically translated screenshot or capture of the localised app) |
 | `glossary.md` | Terminology decisions. Change a term here first. |
 | `technote.json` | Document settings (normally written once by the agent) |
 
@@ -75,6 +75,23 @@ Per-label overrides in `figures/layout/fig-NN.json` → `items[N]`:
 `"scale": 1.2`, `"size": 28`, `"weight": "light"|"regular"|"bold"`, `"align": "left"|"center"`,
 `"dx"`, `"dy"`, `"box": [x, y, w, h]`, `"bg"`, `"fg"`, `"erase_pad"`.
 Per figure: `"localize": false` keeps the image unchanged; `"replace": "fig-NN-ja.png"` uses a ready-made image.
+
+### Screenshot translation
+
+Use the `technote-localise-screenshots` skill for screenshots, not the generic diagram text overlay.
+It preserves `figures/fig-NN.png`, mechanically replaces only the text in a separate
+`figures/fig-NN-<tgt>.png`, and connects the reviewed result through the layout's `"replace"` key.
+Keep `"localize": false` to bypass diagram rendering; `"replace"` takes precedence when present.
+
+The skill uses the target-language XLIFF from a local **4D or 4D Server** installation for 4D's own UI,
+and the demo's translated resources for demo labels. Fonts must match the actual context: 4D forms,
+browser content, browser chrome and native system dialogs can use different fonts on macOS and Windows.
+The target language, OS version, theme and display scale matter; a generic CJK font is not proof of fidelity.
+
+When rendering is uncertain, the agent uses `4dcli` to launch full GUI 4D and capture the relevant UI where
+possible. **tool4d is English-only** and cannot verify localised native UI. Missing resources, fonts or a
+matching platform are reported, not silently substituted. Remaining uncertainty requires your manual
+confirmation or a localised capture before the screenshot is accepted at checkpoint 4.
 
 ## Commands
 
@@ -128,13 +145,15 @@ on Linux and publishes them. It skips the upload if the release already has asse
 |---|---|
 | `AGENTS.md` | The agent's instructions: rules, workflow and checkpoints (Copilot, Codex; Claude Code via `CLAUDE.md`) |
 | `.github/instructions/technote-translation.instructions.md` | Pipeline reference: `technote.json` keys, extraction, figures, reassembly, pitfalls |
-| `.agents/` | Git submodule → [miyako/skills](https://github.com/miyako/skills), branch `dist`: the `technote-*` skills (figures, glossary, demo data, 4D demo, release) and the generic 4D skills (`4dlocalise`, `4dstartup`, `4dlsp`, …) |
+| `.agents/` | Git submodule → [miyako/skills](https://github.com/miyako/skills), branch `dist`: the `technote-*` skills (figures, screenshots, glossary, demo data, 4D demo, release) and the generic 4D skills (`4dlocalise`, `4dstartup`, `4dlsp`, …) |
 
 - In an existing clone, or if `.agents/` is empty: `git submodule update --init .agents`.
 - `.github/workflows/update-skills.yml` moves `.agents` to the latest skills every Monday (or on demand from the
   Actions tab) and commits the new pointer. To update by hand:
   `git submodule update --remote .agents && git commit -m "Update skills" .agents`.
 - Don't edit files under `.agents/`; improve the skill in miyako/skills instead.
+- Screenshot translation requires `.agents/skills/technote-localise-screenshots/SKILL.md`. If missing, update the
+  submodule after the skill is published to `dist`; until then, leave screenshots unchanged and report the blocker.
 - Tools that the skills download (e.g. `tool4d-lsp-stdio` for syntax checks) go to `tools/4dlsp/` and similar
   folders, which are git-ignored. The pipeline scripts `tools/*.py` are committed.
 
