@@ -3,6 +3,11 @@ README template for a converted repository.
 At the release phase the agent replaces README.md with this file:
 - fill in every {{PLACEHOLDER}}; never invent values (take them from technote.json, the PDF, demo/ and the release)
 - delete sections that don't apply (e.g. "Demo data" if the data was not localised)
+- for Japanese, use the approved translated title and the glossary's localised component/tool title consistently
+  in prose, without renaming code identifiers or overriding resource-verified UI strings; do not automatically
+  append English glosses on first occurrence
+- follow the Japanese editorial conventions in .github/instructions/technote-translation.instructions.md:
+  the Japanese PDF cover omits Technical Note NN-NN only there; keep the English source and original PDF intact
 - delete this comment and the other HTML comments
 -->
 
@@ -44,7 +49,7 @@ The PDF is generated from plain-text sources. Edit them and run `make`.
 
 | File | What |
 |---|---|
-| `src/{{TARGET_LANG}}.md` | Translated body text. **Don't touch code blocks** (`make check` verifies them). |
+| `src/{{TARGET_LANG}}.md` | Translated text. Keep body blocks aligned with the source; the approved Japanese cover metadata omission is allowed. **Don't touch code blocks** (`make check` verifies them). |
 | `figures/fig-NN.{{TARGET_LANG}}.txt` | Text drawn in figure NN. Line N corresponds to line N of `fig-NN.{{SOURCE_LANG}}.txt`: an identical line keeps the original, an empty line erases it. |
 | `figures/layout/fig-NN.json` | Per-label overrides for size, weight, alignment and position; `"replace"` uses a ready-made image |
 | `glossary.md` | Terminology |
@@ -61,6 +66,8 @@ See the [localisation template]({{TEMPLATE_URL}}) for the full workflow.
 
 ## Credits
 
+<!-- For Japanese author credits, use author（company role）, preserving the name/company and translating the role;
+     e.g. Elliott Jensen（4D Inc. テクニカルサービスエンジニア）. Use actual credits, not this example as a default. -->
 - Original: {{ORIGINAL_CREDITS}}
 - Translation: {{TRANSLATION_CREDITS}}
 - Produced with [{{TEMPLATE_NAME}}]({{TEMPLATE_URL}}) and GitHub Copilot.
