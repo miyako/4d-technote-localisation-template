@@ -104,10 +104,11 @@ Track the phases with todos. **STOP** means: summarise what you did, list what t
 - Commit. **STOP (checkpoint 3):** ask the user to review `src/<tgt>.md` and `glossary.md`, and list any terms you
   were unsure about.
 - **STOP (checkpoint 4):** ask the user to review the contact sheets and the PDF, including mechanically translated
-  screenshots. If wording, fonts or rendering remain uncertain, use `4dcli` to capture the full GUI 4D application
-  where applicable, then ask for manual confirmation or a localised capture if still unsure. tool4d is English-only
-  and is not evidence for localised native UI rendering. Leave unresolved screenshots unchanged and report them;
-  never present them as verified.
+  screenshots. If wording, fonts or rendering remain uncertain, prefer a short shot list and manual window captures;
+  follow the [Mac capture guidance](.github/instructions/technote-translation.instructions.md#mac-captures-and-opening-4d-editors).
+  Stop automation immediately if the editor takes over. Use `4dcli` only for an approved full-GUI capture workflow.
+  tool4d is English-only and is not evidence for localised native UI rendering. Ask for manual confirmation if
+  still unsure; leave unresolved screenshots unchanged and report them, never present them as verified.
 
 ### Phase 3: Edit loop (repeat as needed)
 - Apply the user's directions, or rebuild after the user's own edits: run `make`, inspect what changed, and commit.
