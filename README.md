@@ -56,12 +56,28 @@ Edits are always safe. Generated output goes to `build/` only, and `make extract
 
 | File | What |
 |---|---|
-| `src/ja.md` | Translated body text (Markdown). Keep the block structure parallel to `src/en.md`. **Don't touch code blocks.** |
+| `src/ja.md` | Translated text (Markdown). Keep body blocks parallel to `src/en.md`; the approved Japanese cover metadata omission is allowed (see below). **Don't touch code blocks.** |
 | `figures/fig-NN.ja.txt` | Text drawn in figure NN, one line per line of `fig-NN.en.txt` (see below) |
 | `figures/layout/fig-NN.json` | Optional per-label tweaks (size, weight, alignment, position) |
 | `figures/fig-NN-ja.png` | Reviewed replacement image (mechanically translated screenshot or capture of the localised app) |
 | `glossary.md` | Terminology decisions. Change a term here first. |
 | `technote.json` | Document settings (normally written once by the agent) |
+
+### Japanese editorial style
+
+Translate the cover title, omit the `Technical Note NN-NN` identifier from the Japanese cover only, and format
+the byline as `author（company role）`, preserving the name/company and translating the role. Keep `src/en.md`
+and the original PDF unchanged; the cover omission is not a reason to alter the source.
+
+Use the approved localised component/tool title consistently in prose, without renaming code identifiers or
+substituting narrative terminology for resource-verified UI strings. Do not automatically append English glosses
+on first occurrence. The editor's narrative terms include `シングルユーザー版` (standalone edition) and
+`メソッドエディター` (Code Editor). Prefer verified equivalent current Japanese documentation links in translated
+prose, without changing source English URLs or code.
+
+The full rules and verified command-reference examples are in the
+[translation conventions](.github/instructions/technote-translation.instructions.md#translation-conventions);
+record document-specific titles and terminology in `glossary.md`.
 
 ### Figure text rules
 

@@ -107,7 +107,8 @@ monospace font for code instead of colours, `code.colors` can stay empty.
 
 ## Translation conventions
 
-- Translate paragraph by paragraph, keeping Markdown structure and order.
+- Translate the body paragraph by paragraph, keeping Markdown structure, heading hierarchy and block order.
+  The approved Japanese cover metadata omission below does not require a matching deletion in `src/en.md`.
 - Translate captions but keep `fig-NN`. Keep the fences of code blocks exactly as they are, language tag included.
 - Japanese:
   - です・ます調.
@@ -115,14 +116,46 @@ monospace font for code instead of colours, `code.colors` can stay empty.
   - Full-width `（）` and `：` in prose.
   - Use the official 4D Japanese documentation terms (e.g. Webエリア, エンティティセレクション, データストア, 引数,
     メソッド, フォーム, コレクション) and record them in `glossary.md` (`| English | 日本語 | Notes |`).
-  - First occurrence of a technical term: 日本語（English）.
+  - Do not automatically append English glosses on first occurrence. For example,
+    `メソッド（method）のプロパティ（property）` disrupts reading; use `メソッドのプロパティ`.
+    Use English only when needed to disambiguate, when approved by the editor, or for identifiers and actual
+    quoted UI strings.
+  - In narrative prose, use `シングルユーザー版` for standalone (the 4D product edition) and `メソッドエディター`
+    for Code Editor. These editorial choices do not override authoritative screenshot or quoted UI wording.
 - Other languages: agree on the style with the user, and set the fonts (`figure_fonts`) and the font stack in
   `style/style.css`.
 - Inline code (`` `name` ``) stays as is. Identifiers in prose that refer to code stay in their original form.
 - Keep figure labels short: the boxes are fixed.
 - Translator's notes (e.g. where the localised demo differs from the original): only with the user's agreement, as a
-  `> **訳注**：…` blockquote right after the paragraph concerned. It is the only extra block allowed in `src/<tgt>.md`;
-  it is styled by `blockquote` in `style/style.css`.
+  `> **訳注**：…` blockquote right after the paragraph concerned. It is the only extra body block allowed in
+  `src/<tgt>.md`; it is styled by `blockquote` in `style/style.css`.
+
+### Japanese cover and component/tool titles
+
+- Translate the cover title into Japanese. Omit the `Technical Note NN-NN` identifier from the Japanese cover
+  only; this is an approved cover metadata exception, not permission to delete identifiers in the body or source.
+  Preserve the original PDF and `src/en.md`; never edit the English source merely to restore cover block alignment.
+- Use the byline pattern `author（company role）`, preserving the author's name and company and translating the
+  role. For example: `Elliott Jensen（4D Inc. テクニカルサービスエンジニア）`. Use the actual author's details, not
+  this example as a default.
+- Record the editor-approved localised component/tool title in `glossary.md` and use it consistently in narrative
+  prose, including the cover title where applicable. Do not rename code identifiers, project paths or actual UI
+  strings to force a match. Verify quoted and screenshot UI against the target-language resources before changing
+  it; leave unresolved UI wording unchanged and report it.
+
+### Documentation links in Japanese prose
+
+Prefer current Japanese documentation on `developer.4d.com` over legacy `doc.4d.com` links when the destination
+has been verified to document the same command or concept with equivalent semantics for the note's 4D version.
+For these commands, the current Japanese references are:
+
+- [METHOD Get attribute](https://developer.4d.com/docs/ja/commands/method-get-attribute)
+- [METHOD SET ATTRIBUTE](https://developer.4d.com/docs/ja/commands/method-set-attribute)
+
+Open and check each destination before replacing a link; do not infer slug migrations or use a plural command's
+page for a singular command. If an equivalent Japanese page cannot be verified, keep the existing link and report
+the uncertainty. Apply link updates only in translated prose: source English URLs in `src/en.md`, the original
+PDF and all code remain unchanged.
 
 ## Figure localisation (`tools/render_figures.py`)
 
@@ -223,6 +256,10 @@ The workflow is in the skill `technote-localise-4d-project`; the 4D rules are in
 - [ ] No source-language leftovers: grep `<tgt>.md` and `*.<tgt>.txt` for long ASCII sentences and old example
   names.
 - [ ] The glossary is consistent: grep for alternative spellings of key terms.
+- [ ] Japanese editorial style: translated cover title, Technical Note number omitted from the Japanese cover
+  only, correct `author（company role）` byline, consistent localised component/tool title in prose, and no automatic
+  first-occurrence English glosses. Body block alignment and the English source are preserved; UI wording is
+  resource-verified, and changed documentation links have verified destinations and equivalent semantics.
 - [ ] Numbers in examples were recomputed from the committed data.
 - [ ] 4D: changed `.4dm` files pass the `4dlsp` syntax check; `tools/tool4d.py --compile` and the test methods pass
   (or it is stated that tool4d was unavailable); XLIFF resolves in each language; no unverified token suffixes

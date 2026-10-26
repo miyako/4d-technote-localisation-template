@@ -35,8 +35,10 @@ then; at release it is replaced (Phase 6).
 1. **Code is never translated.** Program code blocks in `src/<tgt>.md` must be byte-identical to `src/en.md`.
    `make check` enforces this. Only ```` ```text ```` blocks (sample values or output) may differ.
 2. **Never patch the PDF.** Always regenerate it from `src/` and `figures/` with `make`.
-3. **Keep `src/en.md` and `src/<tgt>.md` block-aligned:** same headings, paragraphs, code blocks and figures, in the
-   same order.
+3. **Keep the bodies of `src/en.md` and `src/<tgt>.md` block-aligned:** same heading hierarchy, paragraphs, code
+   blocks and figures, in the same order. Explicitly approved Japanese cover metadata omissions (the Technical
+   Note number) are allowed; never alter `src/en.md` merely to match an edited Japanese cover. Keep the original
+   PDF read-only.
 4. **Never overwrite user edits.** Don't run `tools/extract.py --force` without asking. Don't regenerate `<tgt>` files.
    Before editing a file, re-read it: the user may have changed it since you last saw it.
 5. **Glossary first.** Terminology lives in `glossary.md`. When a term changes, update the glossary, then report and
@@ -85,9 +87,14 @@ Track the phases with todos. **STOP** means: summarise what you did, list what t
 - Commit. **STOP (checkpoint 2):** report the counts of headings, code blocks and figures, plus anything doubtful.
 
 ### Phase 2: Translation
-- Create `src/<tgt>.md`: translate paragraph by paragraph, keeping the structure, code fences and `![caption](fig-NN)`.
+- Create `src/<tgt>.md`: translate the body paragraph by paragraph, keeping the structure, code fences and
+  `![caption](fig-NN)`. For Japanese, follow the editorial conventions in
+  `.github/instructions/technote-translation.instructions.md`: translate the cover title, omit the Technical Note
+  number from the Japanese cover only, and format the byline as `author（company role）`.
 - Create `figures/fig-NN.<tgt>.txt` for each localisable figure, line-aligned with the English file.
-- Record every terminology choice and proper noun in `glossary.md`.
+- Record every terminology choice and proper noun in `glossary.md`. Use the approved localised component/tool
+  title consistently in prose; preserve code identifiers and verify actual UI strings against resources.
+  Do not automatically add English glosses on first occurrence.
 - For screenshots, use `technote-localise-screenshots`: mechanically replace text with authoritative UI
   translations and context-correct fonts, preserving the original image and saving a separate replacement.
   Keep `"localize": false` to bypass the diagram overlay; set `"replace"` to the reviewed replacement.
