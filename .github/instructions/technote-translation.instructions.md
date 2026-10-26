@@ -147,8 +147,8 @@ Rotated labels (OCR usually misses them; add the item and its line by hand):
   and across the baseline, px); `box` is then only used to sample colours.
 - For rotated labels, `dx`/`dy` move the centre in image pixels.
 Per figure:
-- `"localize": false` copies the image unchanged (use it for screenshots)
-- `"replace": "fig-NN-<tgt>.png"` uses a ready-made image from `figures/`, keeping `width_pt` (a different aspect
+- `"localize": false` copies the image unchanged unless `"replace"` is set (use it to bypass diagram overlays on screenshots)
+- `"replace": "fig-NN-<tgt>.png"` takes precedence over `localize` and uses a ready-made image from `figures/`, keeping `width_pt` (a different aspect
   ratio only changes the height)
 
 Typical fixes:
@@ -160,6 +160,27 @@ Typical fixes:
   `name<TGT>` fields.
 
 Always check with `make review` (original above, localised below).
+
+### Screenshots
+
+Use `technote-localise-screenshots` for mechanical screenshot text replacement. If the pinned `.agents` does not
+contain the skill, report the missing dependency and leave screenshots unchanged until it is published and the
+submodule is updated. Reusable procedures belong in that skill, not in this reference.
+
+- Keep the original `figures/fig-NN.png` untouched. Save the result as `figures/fig-NN-<tgt>.png` and use `"replace"`
+  in the layout; keep `"localize": false` so the diagram renderer cannot accidentally repaint the screenshot.
+- Resolve 4D-owned UI text from target-language `.xlf` resources in a local full 4D or 4D Server installation
+  (not English-only tool4d). Resolve demo-owned text from the demo's translated resources. Preserve code,
+  identifiers and values unless an approved demo-data change requires otherwise.
+- Match each region's actual fonts and rendering context: 4D form, browser content (CSS/webfonts), browser chrome
+  or OS dialog; platform/version, locale, theme and display scale affect the result. The diagram renderer's global
+  `figure_fonts` is not a per-region screenshot font selector; do not invent unsupported item font overrides.
+- When in doubt, follow `4dcli` to launch full GUI 4D and capture the relevant runtime UI. Headless tool4d or a
+  Form Editor image cannot establish native-dialog fidelity. Do not modify the demo for capture without the
+  project-editing checkpoint. If still uncertain or the matching environment is unavailable, request manual
+  confirmation or a localised screenshot, and leave the result explicitly unverified.
+- Review replacements on contact sheets and at native resolution, then spot-check the rebuilt PDF. Keep
+  checkpoint 4: mechanical translation does not remove editorial approval.
 
 ## Reassembly (`tools/build.py`)
 
@@ -197,7 +218,8 @@ The workflow is in the skill `technote-localise-4d-project`; the 4D rules are in
 
 - [ ] `make check` passes, and a deliberate code edit makes it fail. `make` builds; TOC page numbers are right; the
   page count is plausible.
-- [ ] Every localised figure has been seen on a contact sheet. Screenshots are replaced or approved as is.
+- [ ] Every localised figure has been seen on a contact sheet. Screenshot replacements have authoritative wording
+  and context-matched fonts; uncertain rendering is manually confirmed, or the original is explicitly approved as is.
 - [ ] No source-language leftovers: grep `<tgt>.md` and `*.<tgt>.txt` for long ASCII sentences and old example
   names.
 - [ ] The glossary is consistent: grep for alternative spellings of key terms.
